@@ -1,0 +1,21 @@
+# AI Text Detection System Dependencies
+# Minimal set of libraries required for training and inference
+
+# Core ML libraries
+torch>=2.0.0
+transformers>=4.30.0
+lightgbm>=4.0.0
+scikit-learn>=1.3.0
+
+# Data processing
+numpy>=1.24.0
+pandas>=2.0.0
+jsonlines>=3.1.0
+
+# API service
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+
+# Calibration and evaluation
+scipy>=1.11.0
