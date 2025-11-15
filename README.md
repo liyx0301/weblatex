@@ -277,7 +277,27 @@ I am open to and request you to contribute to this project. You can just Create 
 
 This repository now includes a complete **AI Text Detection** solution with one-click training, inference CLI, REST API service, and automated Docker image publishing to GitHub Container Registry (GHCR).
 
+## ⚡ Quick Example
+
+```bash
+# Train the model (one command!)
+bash scripts/setup_and_train.sh
+
+# Detect AI text via CLI
+bash scripts/infer.sh "机器学习是人工智能的重要分支"
+
+# Or start API service
+make serve
+
+# Call the API
+curl -X POST "http://localhost:8000/infer" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Your text here"}'
+```
+
 ## 🚀 Quick Start
+
+> **⚠️ DEMO DATA WARNING:** This implementation includes only 16 sample texts for demonstration. The model trained on this data will NOT perform well in production. For real-world use, you MUST collect and use thousands of AI-generated and human-written texts in your domain.
 
 ### Prerequisites
 - Python 3.10+
@@ -539,6 +559,31 @@ Core libraries:
 - **scikit-learn** - ML utilities and calibration
 
 See `requirements.txt` for complete list and versions.
+
+## 🔒 Security Summary
+
+**Security Scan Results:** ✅ No vulnerabilities detected
+
+The codebase has been scanned with CodeQL and no security vulnerabilities were found. The implementation follows security best practices:
+
+- ✅ No hardcoded credentials or secrets
+- ✅ Input validation in API endpoints
+- ✅ Proper error handling
+- ✅ Safe file operations with path validation
+- ✅ No SQL injection vectors (no database used)
+- ✅ Docker image uses minimal base and regular updates recommended
+
+**Security Recommendations for Production:**
+
+1. **Model Security**: Store trained models securely, consider encryption at rest
+2. **API Authentication**: Add authentication/authorization (OAuth2, API keys) before public deployment
+3. **Rate Limiting**: Implement rate limiting to prevent abuse
+4. **Input Sanitization**: Already implemented via Pydantic validation, but monitor for edge cases
+5. **HTTPS**: Use HTTPS in production (configure reverse proxy like nginx)
+6. **Container Security**: Regularly update base Docker images and dependencies
+7. **Model Versioning**: Track model versions and validate before loading
+
+**Vulnerability Disclosure:** No known vulnerabilities at time of release. For security issues, please contact the repository maintainers privately.
 
 ## 🤝 Contributing to AI Text Detection
 
