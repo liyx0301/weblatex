@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+demo.tex
+LICENSE
+
+# CI/CD
+.github/
+
+# Processed data (models should be in models/ or mounted)
+data/processed/
+data/features/
+
+# LaTeX specific
+.devcontainer/
+PDF/
+*.pdf
+*.aux
+*.log

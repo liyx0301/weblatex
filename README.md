@@ -399,6 +399,15 @@ Or manually:
 docker run -p 8000:8000 ai-text-detection:latest
 ```
 
+Or use Docker Compose with volume mounting:
+
+```bash
+# After training models locally
+docker-compose up -d
+```
+
+This will mount the local `models/` directory into the container.
+
 ### Pull from GitHub Container Registry
 
 Pre-built images are automatically published to GHCR when code is pushed to the main branch:

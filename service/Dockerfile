@@ -19,9 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY service/ ./service/
 
-# Copy models directory (should be pre-trained)
-# Users should mount models or copy them before building
-COPY models/ ./models/
+# Create models directory
+# Note: Models should be mounted as volume or built during CI/CD
+# The service will handle missing models gracefully
+RUN mkdir -p ./models
 
 # Expose port
 EXPOSE 8000

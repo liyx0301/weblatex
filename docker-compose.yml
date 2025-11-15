@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  ai-text-detection:
+    build:
+      context: .
+      dockerfile: service/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount the models directory from host
+      - ./models:/app/models:ro
+    environment:
+      - MODELS_DIR=/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

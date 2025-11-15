@@ -1,4 +1,4 @@
-.PHONY: all install train serve infer docker-build docker-run clean help
+.PHONY: all install train serve infer docker-build docker-run docker-compose-up docker-compose-down docker-stop clean help
 
 # Default target
 all: install train
@@ -40,6 +40,16 @@ docker-run:
 	@echo "Service will be available at http://localhost:8000"
 	docker run -p 8000:8000 --name ai-text-detection ai-text-detection:latest
 
+# Run with Docker Compose (mounts models directory)
+docker-compose-up:
+	@echo "Starting services with Docker Compose..."
+	docker-compose up -d
+
+# Stop Docker Compose services
+docker-compose-down:
+	@echo "Stopping Docker Compose services..."
+	docker-compose down
+
 # Stop and remove Docker container
 docker-stop:
 	@echo "Stopping Docker container..."
@@ -68,9 +78,11 @@ help:
 	@echo "  make infer TEXT=\"...\" - Run CLI inference on text"
 	@echo ""
 	@echo "Docker:"
-	@echo "  make docker-build - Build Docker image"
-	@echo "  make docker-run   - Run Docker container"
-	@echo "  make docker-stop  - Stop and remove Docker container"
+	@echo "  make docker-build      - Build Docker image"
+	@echo "  make docker-run        - Run Docker container"
+	@echo "  make docker-compose-up - Start with Docker Compose (mounts models)"
+	@echo "  make docker-compose-down - Stop Docker Compose services"
+	@echo "  make docker-stop       - Stop and remove Docker container"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make clean        - Remove generated files"
@@ -80,3 +92,4 @@ help:
 	@echo "  make all"
 	@echo "  make infer TEXT=\"机器学习是人工智能的分支\""
 	@echo "  make serve"
+	@echo "  make docker-compose-up"
