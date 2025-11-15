@@ -271,6 +271,278 @@ I am open to and request you to contribute to this project. You can just Create 
 3. Release: Export PDF as a release version
 4. You tell me
 
+---
+
+# AI Text Detection System
+
+This repository now includes a complete **AI Text Detection** solution with one-click training, inference CLI, REST API service, and automated Docker image publishing to GitHub Container Registry (GHCR).
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.10+
+- pip
+
+### One-Click Training
+
+Run the complete training pipeline with a single command:
+
+```bash
+bash scripts/setup_and_train.sh
+```
+
+This script will:
+1. Install all required dependencies
+2. Preprocess the sample data
+3. Extract features using GPT-2 (perplexity) and BERT (embeddings)
+4. Train LightGBM and Transformer models
+5. Calibrate predictions and find optimal ensemble weights
+6. Generate evaluation metrics
+
+**Note:** The included `data/raw.jsonl` contains only demo data (16 samples). For production use, replace it with a real dataset containing thousands of AI and human-written texts.
+
+### Command-Line Inference
+
+After training, detect AI-generated text directly from the command line:
+
+```bash
+bash scripts/infer.sh "Your text to analyze here"
+```
+
+Or use the Makefile:
+
+```bash
+make infer TEXT="人工智能技术发展迅速，深度学习模型性能不断提升。"
+```
+
+Example output:
+```
+============================================================
+AI Text Detection Result
+============================================================
+Text: 人工智能技术发展迅速，深度学习模型性能不断提升。...
+
+Prediction: AI
+AI Probability: 0.8234
+Human Probability: 0.1766
+
+Perplexity: 45.23
+LightGBM Probability: 0.8156
+Transformer Probability: 0.8312
+============================================================
+```
+
+### REST API Service
+
+Start the FastAPI service:
+
+```bash
+make serve
+```
+
+Or:
+
+```bash
+uvicorn service.app.main:app --host 0.0.0.0 --port 8000
+```
+
+The service provides the following endpoints:
+
+- **POST /infer** - Detect AI-generated text
+- **GET /health** - Health check
+- **GET /docs** - Interactive API documentation (Swagger UI)
+
+#### API Usage Example
+
+```bash
+curl -X POST "http://localhost:8000/infer" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Machine learning algorithms can analyze large datasets."}'
+```
+
+Response:
+```json
+{
+  "text": "Machine learning algorithms can analyze large datasets.",
+  "prob_ai": 0.8523,
+  "prob_human": 0.1477,
+  "label": "AI",
+  "perplexity": 42.15,
+  "lgb_prob": 0.8401,
+  "trans_prob": 0.8645
+}
+```
+
+## 🐳 Docker Deployment
+
+### Build Docker Image
+
+```bash
+make docker-build
+```
+
+Or manually:
+
+```bash
+docker build -t ai-text-detection:latest -f service/Dockerfile .
+```
+
+### Run Docker Container
+
+```bash
+make docker-run
+```
+
+Or manually:
+
+```bash
+docker run -p 8000:8000 ai-text-detection:latest
+```
+
+### Pull from GitHub Container Registry
+
+Pre-built images are automatically published to GHCR when code is pushed to the main branch:
+
+```bash
+docker pull ghcr.io/liyx0301/weblatex:latest-cpu
+docker run -p 8000:8000 ghcr.io/liyx0301/weblatex:latest-cpu
+```
+
+Available image tags:
+- `latest-cpu` - Latest CPU version from main branch
+- `v1.0.0-cpu` - Semantic version tags (when tagged)
+- `main-{sha}-cpu` - Branch and commit SHA
+- `{YYYYMMDD}-{sha}-cpu` - Date and commit SHA
+
+## 📋 Makefile Commands
+
+The project includes a Makefile for convenience:
+
+| Command | Description |
+|---------|-------------|
+| `make all` | Install dependencies and run training |
+| `make install` | Install Python dependencies |
+| `make train` | Run complete training pipeline |
+| `make serve` | Start FastAPI service on port 8000 |
+| `make infer TEXT="..."` | Run CLI inference |
+| `make docker-build` | Build Docker image |
+| `make docker-run` | Run Docker container |
+| `make docker-stop` | Stop and remove container |
+| `make clean` | Remove generated files |
+| `make help` | Show all available commands |
+
+## 📁 Directory Structure
+
+```
+.
+├── data/
+│   └── raw.jsonl              # Sample training data (replace with real data)
+├── scripts/
+│   ├── setup_and_train.sh     # One-click training script
+│   └── infer.sh               # CLI inference script
+├── src/
+│   ├── preprocess.py          # Data preprocessing
+│   ├── extract_features.py    # Feature extraction (GPT-2 + BERT)
+│   ├── train.py               # Model training
+│   └── infer_cli.py           # Inference CLI
+├── service/
+│   ├── app/
+│   │   └── main.py            # FastAPI service
+│   └── Dockerfile             # Docker image definition
+├── .github/
+│   └── workflows/
+│       └── ghcr-docker.yml    # CI/CD for Docker images
+├── models/                     # Generated after training
+│   ├── lgb.txt                # LightGBM model
+│   ├── transformer/model.pt   # Transformer model
+│   ├── ensemble.json          # Ensemble weights
+│   ├── calibrators.pkl        # Probability calibrators
+│   └── metrics.json           # Evaluation metrics
+├── requirements.txt           # Python dependencies
+└── Makefile                   # Build automation
+```
+
+## 🔧 Model Architecture
+
+The system uses a hybrid ensemble approach:
+
+1. **Feature Extraction**
+   - **Perplexity**: GPT-2-medium calculates text perplexity (lower for AI text)
+   - **Embeddings**: BERT-base-chinese generates 768-dim semantic embeddings
+
+2. **Models**
+   - **LightGBM**: Gradient boosting on combined features
+   - **Transformer**: Neural network with transformer encoder layers
+
+3. **Post-processing**
+   - **Calibration**: Isotonic regression for probability calibration
+   - **Ensemble**: Weighted combination of LightGBM and Transformer predictions
+
+## 🔍 How It Works
+
+1. **Preprocessing**: Load JSONL data with `text` and `label` (AI/Human)
+2. **Feature Extraction**: Calculate perplexity and extract BERT embeddings
+3. **Training**: Train both models with 60/20/20 train/val/test split
+4. **Calibration**: Calibrate probabilities on validation set
+5. **Ensemble**: Search for optimal weights combining both models
+6. **Evaluation**: Report accuracy, precision, recall, F1, and AUC
+
+## ⚠️ Important Notes
+
+### Demo Data Limitations
+The included `data/raw.jsonl` contains only 16 samples for demonstration purposes. This is **NOT** sufficient for production use.
+
+### For Production Deployment:
+
+1. **Collect Real Data**: Gather thousands of examples of both AI-generated and human-written texts
+2. **Replace Sample Data**: Update `data/raw.jsonl` with your dataset
+3. **Retrain Models**: Run `bash scripts/setup_and_train.sh` again
+4. **Tune Hyperparameters**: Adjust parameters in `src/train.py` for your use case
+5. **Enable GPU**: For faster training/inference, use CUDA-enabled PyTorch
+
+### Ethical Considerations
+
+- AI detection is probabilistic and **not 100% accurate**
+- Results should be used as **assistance only**, not for final decisions
+- Do not use solely for academic integrity or legal judgments
+- Consider false positives/negatives in your application
+
+## 🚧 Future Enhancements
+
+Planned features (to be added in future PRs):
+
+- [ ] GPU Dockerfile (Dockerfile.gpu) for faster inference
+- [ ] Multi-stage Docker builds for smaller images
+- [ ] Model drift monitoring and retraining automation
+- [ ] Incremental learning with new data
+- [ ] Additional features (semantic similarity, multi-language support)
+- [ ] Web UI for interactive detection
+- [ ] Batch processing API endpoint
+- [ ] Model versioning and A/B testing
+
+## 📚 Dependencies
+
+Core libraries:
+- **PyTorch** - Deep learning framework
+- **Transformers** - Pre-trained models (GPT-2, BERT)
+- **LightGBM** - Gradient boosting
+- **FastAPI** - REST API framework
+- **scikit-learn** - ML utilities and calibration
+
+See `requirements.txt` for complete list and versions.
+
+## 🤝 Contributing to AI Text Detection
+
+Contributions are welcome! Areas for improvement:
+
+- Better feature engineering
+- Support for more languages
+- Improved model architectures
+- Performance optimizations
+- Documentation and examples
+
+---
+
 ## Contact
 
 1. Send an email to `mail@sanjibsen.com`
